@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Talk to a duck</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            overflow: hidden;
+        }
+        .quack-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+        #duckContainer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        #duckImg {
+            max-height: 300px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        .quack-widget {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0; /* Important for proper scrolling */
+            overflow: hidden;
+        }
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .input-container {
+            flex-shrink: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        .quack-widget textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .quack-widget button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            clear: both;
+        }
+        .user-bubble {
+            background-color: #e6f2ff;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        .duck-bubble {
+            background-color: #f0f0f0;
+            align-self: flex-end;
+            margin-left: auto;
+            text-align: right;
+        }
+        .loading-bubble {
+            font-style: italic;
+            color: #6c757d;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .button-container button {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="quack-container">
+        <div id="duckContainer">
+            <img id="duckImg" src="tech-duck.png"/>
+        </div>
+        <div class="quack-widget">
+            <div id="chatHistory" class="chat-container"></div>
+            <div class="input-container">
+                <textarea id="quackInput" placeholder="Explain your problem so the duck can help you. Ctrl+Enter to submit" 
+                          onkeydown="handleKeyDown(event)"></textarea>
+                <div class="button-container">
+                    <button onclick="quackify()">Submit</button>
+                    <button onclick="saveChat()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleKeyDown(event) {
+            // Check for Ctrl+Enter
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); // Prevent default newline
+                quackify();
+            }
+        }
+
+        function quackify() {
+            // Get the input element
+            const inputElement = document.getElementById('quackInput');
+            const chatHistoryElement = document.getElementById('chatHistory');
+            const duckContainer = document.getElementById('duckContainer');
+            const duckImg = document.getElementById('duckImg');
+            
+            // Get input value
+            const userInput = inputElement.value.trim();
+            
+            // Skip if input is empty
+            if (!userInput) return;
+            
+            // Shrink duck image and container
+            duckContainer.style.maxHeight = '150px';
+            duckImg.style.maxHeight = '150px';
+            
+            // Create user chat bubble
+            const userBubble = document.createElement('div');
+            userBubble.classList.add('chat-bubble', 'user-bubble');
+            userBubble.innerHTML = userInput.replace(/\n/g, '<br>'); // Change textContent to innerHTML
+            chatHistoryElement.appendChild(userBubble);
+                    
+            // Create loading bubble
+            const loadingBubble = document.createElement('div');
+            loadingBubble.classList.add('chat-bubble', 'duck-bubble', 'loading-bubble');
+            loadingBubble.textContent = "The duck is thinking ...";
+            chatHistoryElement.appendChild(loadingBubble);
+            
+            // Count words
+            const wordCount = userInput.split(/\s+/).length;
+            
+            // Delay response by 1 second
+            setTimeout(() => {
+                // Remove loading bubble
+                chatHistoryElement.removeChild(loadingBubble);
+                
+                // Determine response based on word count mod 3
+                let response;
+                switch(wordCount % 3) {
+                    case 0:
+                        // One quack
+                        response = "quack";
+                        break;
+                    case 1:
+                        // Two quacks
+                        response = "quack quack";
+                        break;
+                    case 2:
+                        // Number of words + question mark
+                        response = Array(wordCount).fill("quack").join(" ") + "?";
+                        break;
+                }
+                
+                // Create duck chat bubble
+                const duckBubble = document.createElement('div');
+                duckBubble.classList.add('chat-bubble', 'duck-bubble');
+                duckBubble.textContent = response;
+                chatHistoryElement.appendChild(duckBubble);
+                
+                // Clear the input
+                inputElement.value = '';
+                
+                // Scroll to bottom
+                chatHistoryElement.scrollTop = chatHistoryElement.scrollHeight;
+            }, 1000);
+        }
+        function saveChat() {
+            // Get all chat bubbles
+            const chatBubbles = document.querySelectorAll('.chat-bubble');
+            
+            // If no messages, show alert
+            if (chatBubbles.length === 0) {
+                alert('No chat history to save.');
+                return;
+            }
+
+            // Create datestamp in YYYYMMDDHHMM format
+            const now = new Date();
+            const datestamp = now.getFullYear() + 
+                              String(now.getMonth() + 1).padStart(2, '0') + 
+                              String(now.getDate()).padStart(2, '0') + 
+                              String(now.getHours()).padStart(2, '0') + 
+                              String(now.getMinutes()).padStart(2, '0');
+
+            // Prepare file content
+            let fileContent = `Date: ${now.toISOString().split('T')[0]}\n\n`;
+
+            // Alternate between user and duck messages
+            let isUserMessage = true;
+            chatBubbles.forEach(bubble => {
+                const prefix = isUserMessage ? 'user: ' : 'duck: ';
+                
+                // Split the text into lines and add indentation for user messages
+                const lines = bubble.innerText.split('\n');
+                const formattedText = isUserMessage 
+                    ? lines.map((line, index) => 
+                        index === 0 ? line : '      ' + line
+                    ).join('\n')
+                    : bubble.innerText;
+
+                fileContent += `${prefix}${formattedText}\n`;
+                isUserMessage = !isUserMessage;
+            });
+
+            // Create and download file
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `talktoaduck_${datestamp}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
