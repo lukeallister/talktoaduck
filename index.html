@@ -174,10 +174,11 @@
                 box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
                 transition: bottom 0.3s ease;
                 box-sizing: border-box;
+                z-index: 1000;
             }
             
             .input-container.keyboard-open {
-                bottom: 30px; /* Keep above footer when keyboard is open */
+                bottom: 50vh; /* Move up when keyboard is open */
             }
         }
 
@@ -261,19 +262,39 @@
         });
 
         // Keyboard handling for mobile
+        let initialViewportHeight = window.innerHeight;
+        
+        // Detect keyboard open/close by viewport height change
+        function handleViewportChange() {
+            if (window.innerWidth <= 768) {
+                const currentHeight = window.innerHeight;
+                const heightDifference = initialViewportHeight - currentHeight;
+                
+                if (heightDifference > 150) { // Keyboard is likely open
+                    inputContainer.classList.add('keyboard-open');
+                } else { // Keyboard is likely closed
+                    inputContainer.classList.remove('keyboard-open');
+                }
+            }
+        }
+        
+        // Listen for viewport changes
+        window.addEventListener('resize', handleViewportChange);
         
         inputElement.addEventListener('focus', () => {
             if (window.innerWidth <= 768) {
-                inputContainer.classList.add('keyboard-open');
+                // Small delay to allow keyboard to start opening
                 setTimeout(() => {
-                    inputContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    handleViewportChange();
                 }, 300);
             }
         });
         
         inputElement.addEventListener('blur', () => {
             if (window.innerWidth <= 768) {
-                inputContainer.classList.remove('keyboard-open');
+                setTimeout(() => {
+                    inputContainer.classList.remove('keyboard-open');
+                }, 300);
             }
         });
 
