@@ -39,7 +39,6 @@
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
-            padding-bottom: 30px; /* Space for footer */
         }
         .chat-container {
             flex-grow: 1;
@@ -123,7 +122,7 @@
             }
             .chat-container {
                 padding: 5px;
-                padding-bottom: 200px; /* More space for fixed input container */
+                padding-bottom: 160px; /* Space for fixed input container */
             }
             .button-container {
                 flex-direction: column; /* Stack buttons vertically on mobile */
@@ -170,7 +169,7 @@
             
             .input-container {
                 position: fixed;
-                bottom: 50px; /* Higher up to show buttons */
+                bottom: 30px; /* Above footer */
                 left: 0;
                 width: 100%;
                 padding: 10px;
@@ -179,12 +178,12 @@
                 transition: all 0.3s ease;
                 box-sizing: border-box;
                 z-index: 1000;
-                min-height: 280px; /* Ensure enough height for buttons */
+                max-height: 40vh; /* Limit height to 40% of viewport */
             }
             
             .input-container.keyboard-open {
                 position: fixed;
-                bottom: 20vh; /* Move up when keyboard is open */
+                bottom: 50vh; /* Move up when keyboard is open */
                 transform: translateY(0);
             }
         }
