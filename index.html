@@ -121,16 +121,20 @@
             #duckImg {
                 max-height: 150px; /* Even smaller on very small screens */
             }
-            .input-container, .chat-container {
+            .chat-container {
                 padding: 5px;
+                padding-bottom: 120px; /* Extra space for fixed input */
             }
             .button-container {
                 flex-direction: column; /* Stack buttons vertically on mobile */
-                gap: 10px;
+                gap: 8px;
+                margin-top: 8px;
             }
             
             .button-container button {
                 width: 100%; /* Full width buttons on mobile */
+                padding: 12px;
+                font-size: 16px;
             }
         }
 
@@ -172,15 +176,16 @@
                 padding: 10px;
                 background-color: white;
                 box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-                transition: bottom 0.3s ease;
+                transition: all 0.3s ease;
                 box-sizing: border-box;
                 z-index: 1000;
+                max-height: 200px; /* Prevent it from getting too tall */
             }
             
             .input-container.keyboard-open {
                 position: fixed;
-                bottom: 50vh; /* Move up significantly when keyboard is open */
-                transform: none;
+                bottom: 40vh; /* Move up when keyboard is open */
+                transform: translateY(0);
             }
         }
 
@@ -304,13 +309,24 @@
             if (window.innerWidth <= 768) {
                 let initialViewportHeight = window.innerHeight;
                 
-                // Use Visual Viewport API if available
+                // Simple approach: always move input up on focus for mobile
+                inputElement.addEventListener('focus', () => {
+                    inputContainer.classList.add('keyboard-open');
+                });
+                
+                inputElement.addEventListener('blur', () => {
+                    setTimeout(() => {
+                        inputContainer.classList.remove('keyboard-open');
+                    }, 300);
+                });
+                
+                // Use Visual Viewport API if available for better detection
                 if (window.visualViewport) {
                     const viewport = window.visualViewport;
                     
                     function updateInputPosition() {
                         const keyboardHeight = window.innerHeight - viewport.height;
-                        if (keyboardHeight > 100) { // Lower threshold
+                        if (keyboardHeight > 50) {
                             inputContainer.classList.add('keyboard-open');
                         } else {
                             inputContainer.classList.remove('keyboard-open');
@@ -318,49 +334,6 @@
                     }
                     
                     viewport.addEventListener('resize', updateInputPosition);
-                    
-                    // Also trigger on input focus
-                    inputElement.addEventListener('focus', () => {
-                        setTimeout(updateInputPosition, 300);
-                    });
-                    
-                    inputElement.addEventListener('blur', () => {
-                        setTimeout(() => {
-                            inputContainer.classList.remove('keyboard-open');
-                        }, 300);
-                    });
-                } else {
-                    // Fallback: Force keyboard-open class on focus for older browsers
-                    inputElement.addEventListener('focus', () => {
-                        inputContainer.classList.add('keyboard-open');
-                        // Also try to detect via window resize
-                        setTimeout(() => {
-                            const currentHeight = window.innerHeight;
-                            const heightDiff = initialViewportHeight - currentHeight;
-                            if (heightDiff < 100) {
-                                // If no significant height change detected, keep it open anyway
-                                inputContainer.classList.add('keyboard-open');
-                            }
-                        }, 500);
-                    });
-                    
-                    inputElement.addEventListener('blur', () => {
-                        setTimeout(() => {
-                            inputContainer.classList.remove('keyboard-open');
-                        }, 300);
-                    });
-                    
-                    // Listen for window resize as backup
-                    window.addEventListener('resize', () => {
-                        const currentHeight = window.innerHeight;
-                        const heightDiff = initialViewportHeight - currentHeight;
-                        
-                        if (heightDiff > 100 && document.activeElement === inputElement) {
-                            inputContainer.classList.add('keyboard-open');
-                        } else if (heightDiff < 50) {
-                            inputContainer.classList.remove('keyboard-open');
-                        }
-                    });
                 }
             }
         }
