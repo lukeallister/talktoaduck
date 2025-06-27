@@ -39,6 +39,7 @@
             flex-grow: 1;
             min-height: 0;
             overflow: hidden;
+            padding-bottom: 30px; /* Space for footer */
         }
         .chat-container {
             flex-grow: 1;
@@ -53,6 +54,7 @@
             padding: 10px;
             background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
+            margin-bottom: 10px; /* Space above footer */
         }
         .quack-widget textarea {
             width: 100%;
@@ -163,18 +165,19 @@
             }
             
             .input-container {
-                position: absolute;
-                bottom: 0;
+                position: fixed;
+                bottom: 30px; /* Above footer */
                 left: 0;
                 width: 100%;
                 padding: 10px;
                 background-color: white;
                 box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
                 transition: bottom 0.3s ease;
+                box-sizing: border-box;
             }
             
             .input-container.keyboard-open {
-                bottom: calc(100% - 100vh + 300px); /* Adjust based on keyboard height */
+                bottom: 30px; /* Keep above footer when keyboard is open */
             }
         }
 
@@ -239,9 +242,12 @@
     </footer>
 
     <script>
-        // Update footer visibility on mobile keyboard
+        // Get elements first
+        const inputElement = document.getElementById('quackInput');
+        const inputContainer = document.querySelector('.input-container');
         const footer = document.querySelector('.site-footer');
 
+        // Update footer visibility on mobile keyboard
         inputElement.addEventListener('focus', () => {
             if (window.innerWidth <= 768) {
                 footer.classList.add('keyboard-hidden');
@@ -255,8 +261,6 @@
         });
 
         // Keyboard handling for mobile
-        const inputElement = document.getElementById('quackInput');
-        const inputContainer = document.querySelector('.input-container');
         
         inputElement.addEventListener('focus', () => {
             if (window.innerWidth <= 768) {
