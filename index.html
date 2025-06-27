@@ -234,7 +234,26 @@
         </div>
     </div>
 
+    <footer class="site-footer">
+        A site by <a href="https://maketechsense.com" target="_blank">Luke Miller</a>
+    </footer>
+
     <script>
+        // Update footer visibility on mobile keyboard
+        const footer = document.querySelector('.site-footer');
+
+        inputElement.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                footer.classList.add('keyboard-hidden');
+            }
+        });
+
+        inputElement.addEventListener('blur', () => {
+            if (window.innerWidth <= 768) {
+                footer.classList.remove('keyboard-hidden');
+            }
+        });
+
         // Keyboard handling for mobile
         const inputElement = document.getElementById('quackInput');
         const inputContainer = document.querySelector('.input-container');
