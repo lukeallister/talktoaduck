@@ -123,7 +123,7 @@
             }
             .chat-container {
                 padding: 5px;
-                padding-bottom: 120px; /* Extra space for fixed input */
+                padding-bottom: 200px; /* More space for fixed input container */
             }
             .button-container {
                 flex-direction: column; /* Stack buttons vertically on mobile */
@@ -170,7 +170,7 @@
             
             .input-container {
                 position: fixed;
-                bottom: 30px; /* Above footer */
+                bottom: 50px; /* Higher up to show buttons */
                 left: 0;
                 width: 100%;
                 padding: 10px;
@@ -179,7 +179,7 @@
                 transition: all 0.3s ease;
                 box-sizing: border-box;
                 z-index: 1000;
-                max-height: 200px; /* Prevent it from getting too tall */
+                min-height: 140px; /* Ensure enough height for buttons */
             }
             
             .input-container.keyboard-open {
