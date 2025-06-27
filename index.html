@@ -178,7 +178,8 @@
             }
             
             .input-container.keyboard-open {
-                bottom: 50vh; /* Move up when keyboard is open */
+                bottom: 20px; /* Move up when keyboard is open */
+                transform: translateY(-50vh);
             }
         }
 
@@ -190,6 +191,42 @@
         .chat-bubble {
             display: inline-block;
             margin: 5px 0;
+        }
+
+        /* Landscape mobile optimizations */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            #duckContainer {
+                padding: 2px;
+            }
+            #duckImg {
+                max-height: 80px; /* Much smaller duck in landscape */
+            }
+            .quack-widget {
+                padding-bottom: 15px; /* Less padding in landscape */
+            }
+            .chat-container {
+                padding: 5px;
+                gap: 5px; /* Tighter spacing */
+            }
+            .chat-bubble {
+                padding: 6px 10px; /* Smaller bubbles */
+                font-size: 14px; /* Smaller text */
+                margin: 2px 0; /* Tighter margins */
+            }
+            .input-container {
+                padding: 5px; /* Less padding */
+                bottom: 15px; /* Closer to bottom */
+            }
+            .quack-widget textarea {
+                min-height: 60px; /* Smaller textarea */
+            }
+            .button-container {
+                margin-top: 5px; /* Less margin */
+            }
+            .button-container button {
+                padding: 8px; /* Smaller buttons */
+                font-size: 14px; /* Smaller button text */
+            }
         }
     </style>
     <style>
@@ -261,42 +298,56 @@
             }
         });
 
-        // Keyboard handling for mobile
-        let initialViewportHeight = window.innerHeight;
-        
-        // Detect keyboard open/close by viewport height change
-        function handleViewportChange() {
+        // Keyboard handling for mobile using Visual Viewport API
+        function handleKeyboardVisibility() {
             if (window.innerWidth <= 768) {
-                const currentHeight = window.innerHeight;
-                const heightDifference = initialViewportHeight - currentHeight;
-                
-                if (heightDifference > 150) { // Keyboard is likely open
-                    inputContainer.classList.add('keyboard-open');
-                } else { // Keyboard is likely closed
-                    inputContainer.classList.remove('keyboard-open');
+                if (window.visualViewport) {
+                    // Use Visual Viewport API if available (modern browsers)
+                    const viewport = window.visualViewport;
+                    
+                    function updateInputPosition() {
+                        const keyboardHeight = window.innerHeight - viewport.height;
+                        if (keyboardHeight > 150) {
+                            inputContainer.classList.add('keyboard-open');
+                        } else {
+                            inputContainer.classList.remove('keyboard-open');
+                        }
+                    }
+                    
+                    viewport.addEventListener('resize', updateInputPosition);
+                } else {
+                    // Fallback for older browsers
+                    let initialHeight = window.innerHeight;
+                    
+                    function checkKeyboard() {
+                        const currentHeight = window.innerHeight;
+                        const heightDiff = initialHeight - currentHeight;
+                        
+                        if (heightDiff > 150) {
+                            inputContainer.classList.add('keyboard-open');
+                        } else {
+                            inputContainer.classList.remove('keyboard-open');
+                        }
+                    }
+                    
+                    window.addEventListener('resize', checkKeyboard);
+                    
+                    // Also check on focus/blur with delays
+                    inputElement.addEventListener('focus', () => {
+                        setTimeout(checkKeyboard, 300);
+                    });
+                    
+                    inputElement.addEventListener('blur', () => {
+                        setTimeout(() => {
+                            inputContainer.classList.remove('keyboard-open');
+                        }, 300);
+                    });
                 }
             }
         }
         
-        // Listen for viewport changes
-        window.addEventListener('resize', handleViewportChange);
-        
-        inputElement.addEventListener('focus', () => {
-            if (window.innerWidth <= 768) {
-                // Small delay to allow keyboard to start opening
-                setTimeout(() => {
-                    handleViewportChange();
-                }, 300);
-            }
-        });
-        
-        inputElement.addEventListener('blur', () => {
-            if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    inputContainer.classList.remove('keyboard-open');
-                }, 300);
-            }
-        });
+        // Initialize keyboard handling
+        handleKeyboardVisibility();
 
         function handleKeyDown(event) {
             // Check for Ctrl+Enter
